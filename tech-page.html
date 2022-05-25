@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Technical Page</title>
+    <link rel="stylesheet" href="tech-page-style.css">
+</head>
+
+<body>
+    <main id="main-doc">
+        <section class="main-section" id="using_the_saver">
+            <header>
+                <h1>Using the Saver</h1>
+            </header>
+            <p>
+                The Saver is the easiest way to add files to your users' Dropboxes. With two clicks, a user can download
+                files of any size into their Dropbox, making those files available on all their computers and devices as
+                soon as the download completes. The Saver is a Drop-in component that works on web and mobile web—all
+                with just a few lines of code.
+            </p>
+        </section>
+        <section class="main-section" id="Setup">
+            <header>
+                <h2>Setup</h2>
+            </header>
+            <p>The first step in adding the Saver is to create an app. Using the Saver doesn't require production
+                approval, so you can publish your integration to your users as soon as you're ready.</p>
+            <p>When you create a Saver app for the web, you'll need to provide the domain names where your app is
+                hosted. This lets us stop other websites from trying to impersonate your app. If you're developing
+                locally, you can use localhost as the domain name as well.</p>
+            <p>Once you've created a new app, add the following JavaScript snippet to your HTML.
+                <code>script type="text/javascript" src="https://www.dropbox.com/static/api/2/dropins.js" id="dropboxjs" data-app-key="YOUR_APP_KEY"</code>
+                You supply the data to be saved by specifying a URL. Dropbox will connect to the supplied URL directly
+                to retrieve the data, without sending the data through the user's browser. Note that the transfer from
+                the URL must complete within 5 minutes, or the operation will time out and an error will be returned.
+            </p>
+            <p>If the destination path for the file already exists, the file will be renamed to avoid the conflict (e.g.
+                myfile (1).txt).</p>
+
+        </section>
+        <section class="main-section" id="Saver_Button">
+            <header>
+                <h2>Saver Button</h2>
+            </header>
+            <p>The easiest way to add the Saver to your app is to change a simple link to a Saver button. You can turn
+                any <a> tag into a Saver button just by adding class="dropbox-saver" to it. You can see this below:
+                    <code>a href="https://dl.dropboxusercontent.com/s/deroi5nwm6u7gdf/advice.png" class="dropbox-saver"</code>
+                    The button takes in the following parameters:
+                    <ul>
+                        <li>class Identifies the anchor element as a Saver button. Must have the value `dropbox-saver`.
+                        </li>
+                        <li>href URL of the file the Saver should add to the user's Dropbox. The Saver supports HTTP and
+                            HTTPS URIs.</li>
+                        <li>data-filename optional User-friendly name of the file that should be saved to the user's
+                            Dropbox can be included if desired. If not included, the filename is inferred from the
+                            `href`.</li>
+                    </ul>
+            </p>
+        </section>
+        <section class="main-section" id="Programmatically_creating_Saver_buttons">
+            <header>
+                <h2>Programmatically creating Saver buttons</h2>
+            </header>
+            <p>Adding the dropbox-saver class to an existing anchor tag is easy if you just need to allow users to save
+                a hardcoded URL. For more dynamic uses, though, you may prefer to create a Save button programmatically
+                by calling Dropbox.createSaveButton.
+            <pre><code> var options = { files: [ // You can specify up to 100 files.
+                {'url': '...', 'filename': '...'},
+                {'url': '...', 'filename': '...'},
+                // ...
+                ],
+      
+                // Success is called once all files have been successfully added to the user's
+                // Dropbox, although they may not have synced to the user's devices yet.
+                success: function () {
+                // Indicate to the user that the files have been saved.
+                alert("Success! Files saved to your Dropbox.");
+                },
+      
+                // Progress is called periodically to update the application on the progress
+                // of the user's downloads. The value passed to this callback is a float
+                // between 0 and 1. The progress callback is guaranteed to be called at least
+                // once with the value 1.
+                progress: function (progress) {},
+      
+                // Cancel is called if the user presses the Cancel button or closes the Saver.
+                cancel: function () {},
+      
+                // Error is called in the event of an unexpected response from the server
+                // hosting the files, such as not being able to find a file. This callback is
+                // also called if there is an error on Dropbox or if the user is over quota.
+                error: function (errorMessage) {}
+                };
+                var button = Dropbox.createSaveButton(options);
+                document.getElementById("container").appendChild(button);</code></pre>
+            If you're only saving one file, you can use the following shortcut:
+            <code>Dropbox.createSaveButton(url, filename, options);</code>
+            The filename parameter can always be omitted, in which case the filename in the URL will be used. You should
+            indicate to the user that the file(s) have been successfully saved to their Dropbox using the success
+            option. Note that these methods may modify the options object but it's safe to reuse for subsequent calls.
+            </p>
+        </section>
+        <section class="main-section" id="Triggering_the_Saver_from_JavaScript">
+            <header>
+                <h2>Triggering the Saver from JavaScript</h2>
+            </header>
+            If you prefer to design a custom button and trigger the Saver, you can trigger the Saver directly from
+            JavaScript by using the following method:
+            <pre><code>var options = { /* Same options as above ... */ };
+      Dropbox.save(options);
+        </code></pre>
+            If you're only saving one file, you can use the following shortcut:
+            <pre><code>var options = { /* Same options as above ... */ };
+      Dropbox.save(url, filename, options);</code></pre>
+            <p>Note that the Saver opens in a pop-up window, so you should only call this function from within a
+                user-triggered event handler such as a tap or click event. Otherwise, the pop-up will likely be blocked
+                by the browser.</p>
+        </section>
+        <section class="main-section" id="Validating_files_are_saved_successfully">
+            <header>
+                <h2>Validating files are saved successfully</h2>
+            </header>
+            Want to validate that files are being saved successfully? Use a content hash. You can check content
+            consistency by adding contentHash to options:
+            <pre>
+      <code> var options = {
+          files: [
+              // You can specify up to 100 files.
+              {'url': '...', 'filename': '...', 'contentHash': '...'},
+              {'url': '...', 'filename': '...'},
+              // ...
+          ],
+          /* Same settings as above ... */
+      }
+      </code>
+      </pre>
+            If the content consistency check fails, the Saver button will show a red failure icon.
+        </section>
+        <section class="main-section" id="How_the_Saver_handles_caching">
+            <header>
+                <h2>How the Saver handles caching</h2>
+            </header>
+            A major benefit of the Saver is that we cache your files on our servers, which reduces your bandwidth costs.
+            We only download unique files from your servers once. After that, we cache on our servers. Saver respects
+            HTTP 1.1's caching controls, storing both freshness and validation info for the URLs you provide. The
+            following section provides details around the appropriate cache headers you can include to enable this.
+            <h3>Freshness</h3>
+            When Dropbox requests the URLs you pass to the Saver, it will examine the Cache-Control and Expires HTTP
+            headers you include with the response. If a user saves a file that hasn't yet expired according to these
+            caching headers, Dropbox will just use the cached file and not hit your server.
+            <h3>Validation</h3>
+            Validation is determined by the ETag and Last-Modified HTTP headers that your server sends when Dropbox
+            downloads the file at the URL. When Dropbox determines that our cached copy is invalid, it will send a
+            request to your server with two validation headers:
+            <ul>
+                <li>If-None-Match, which includes the Etag of the file we have cached;</li>
+                <li>If-Modified-Since, which includes the last modified time of the file we have cached. </li>
+                If your server responds with a 304, Dropbox will continue to use the cached version of the file as well
+                as update the freshness HTTP headers (if given).
+            </ul>
+        </section>
+        <section class="main-section" id="Supported_browsers">
+            <header>
+                <h2>Supported browsers</h2>
+            </header>
+            <p>
+                Not all browsers support the Saver. If a user's browser doesn't support the Saver, we'll gray out the
+                button and show a warning message if you try to call Dropbox.save(). You can check to see if the user's
+                browser is supported by calling <strong>Dropbox.isBrowserSupported()</strong>.
+            </p>
+        </section>
+    </main>
+    <nav id="navbar">
+        <header class="nav_header">JavaScript Saver API</header><br>
+        <ul class="navlist">
+            <li>
+                <a class="nav-link" href="#using_the_saver">Using the Saver</a>
+            </li>
+            <li>
+                <a class="nav-link" href="#Setup">Setup</a>
+            </li>
+            <li>
+                <a class="nav-link" href="#Saver_Button">Saver Button</a>
+            </li>
+            <li>
+                <a class="nav-link" href="#Programmatically_creating_Saver_buttons">Programmatically creating Saver
+                    buttons</a>
+            </li>
+            <li>
+                <a class="nav-link" href="#Triggering_the_Saver_from_JavaScript">Triggering the Saver from
+                    JavaScript</a>
+            </li>
+            <li>
+                <a class="nav-link" href="#Validating_files_are_saved_successfully">Validating files are saved
+                    successfully</a>
+            </li>
+            <li>
+                <a class="nav-link" href="#How_the_Saver_handles_caching">How the Saver handles caching</a>
+            </li>
+            <li>
+                <a class="nav-link" href="#Supported_browsers">Supported browsers</a>
+            </li>
+        </ul><br>
+    </nav><br>
+
+</body>
+
+</html>
